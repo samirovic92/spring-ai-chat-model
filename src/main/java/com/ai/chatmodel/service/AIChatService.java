@@ -1,22 +1,22 @@
 package com.ai.chatmodel.service;
 
+import com.ai.chatmodel.api.MathReasoning;
 import org.springframework.ai.chat.messages.UserMessage;
-import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.ai.model.Media;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.OpenAiApi;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.ai.openai.api.OpenAiApi.ChatCompletionRequest.ResponseFormat;
 import org.springframework.stereotype.Service;
-import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
-import static org.springframework.ai.openai.api.OpenAiApi.*;
+import static org.springframework.ai.openai.api.OpenAiApi.ChatCompletionRequest.ResponseFormat.Type;
+import static org.springframework.ai.openai.api.OpenAiApi.ChatModel;
 
 @Service
 public class AIChatService {
@@ -44,6 +44,29 @@ public class AIChatService {
         return chatModel.call(userMessage);
     }
 
+    public MathReasoning solveEquation(String equation) {
+        var outputConverter = new BeanOutputConverter<>(MathReasoning.class);
+        var jsonSchema = outputConverter.getJsonSchema();
+        var promptTemplate = createEquationSolverTemplate(equation);
+
+        var prompt = new Prompt(
+                promptTemplate.createMessage(),
+                OpenAiChatOptions.builder()
+                        .withModel(ChatModel.GPT_4_O_MINI)
+                        .withResponseFormat(new ResponseFormat(Type.JSON_SCHEMA, jsonSchema))
+                        .build()
+        );
+        var content = chatModel.call(prompt)
+                .getResult().getOutput().getContent();
+        return outputConverter.convert(content);
+    }
+
+    private PromptTemplate createEquationSolverTemplate(String equation) {
+        return new PromptTemplate(
+                "how can I solve {equation}",
+                Map.of("equation", equation)
+        );
+    }
     private PromptTemplate createBookPromptTemplate(String category, String year) {
         return new PromptTemplate(
                 """

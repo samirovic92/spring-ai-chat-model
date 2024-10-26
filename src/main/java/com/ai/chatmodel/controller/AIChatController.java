@@ -1,5 +1,6 @@
 package com.ai.chatmodel.controller;
 
+import com.ai.chatmodel.api.MathReasoning;
 import com.ai.chatmodel.service.AIChatService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -27,4 +28,8 @@ public class AIChatController {
         return chatService.describeImage(image);
     }
 
+    @PostMapping("/solve-equation")
+    public MathReasoning solveEquation(@RequestBody String equation) {
+        return chatService.solveEquation(equation);
+    }
 }
