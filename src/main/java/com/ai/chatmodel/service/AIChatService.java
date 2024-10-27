@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
+import static com.ai.chatmodel.service.AIUtils.getContentFrom;
 import static org.springframework.ai.openai.api.OpenAiApi.ChatCompletionRequest.ResponseFormat.Type;
 import static org.springframework.ai.openai.api.OpenAiApi.ChatModel;
 
@@ -56,17 +57,22 @@ public class AIChatService {
                         .withResponseFormat(new ResponseFormat(Type.JSON_SCHEMA, jsonSchema))
                         .build()
         );
-        var content = chatModel.call(prompt)
-                .getResult().getOutput().getContent();
+        var content = getContentFrom(chatModel.call(prompt));
         return outputConverter.convert(content);
     }
 
-    private PromptTemplate createEquationSolverTemplate(String equation) {
-        return new PromptTemplate(
-                "how can I solve {equation}",
-                Map.of("equation", equation)
+    public String getWeather(String location) {
+        var promptTemplate = createWeatherTemplate(location);
+        var prompt = new Prompt(
+                promptTemplate.createMessage(),
+                OpenAiChatOptions.builder()
+                        .withFunction("currentWeather") // THis function is created in AIConfig class
+                        .build()
         );
+
+        return getContentFrom(chatModel.call(prompt));
     }
+
     private PromptTemplate createBookPromptTemplate(String category, String year) {
         return new PromptTemplate(
                 """
@@ -78,6 +84,22 @@ public class AIChatService {
                 Map.of(
                         "category", category,
                         "year", year
+                )
+        );
+    }
+
+    private PromptTemplate createEquationSolverTemplate(String equation) {
+        return new PromptTemplate(
+                "how can I solve {equation}",
+                Map.of("equation", equation)
+        );
+    }
+
+    private PromptTemplate createWeatherTemplate(String location) {
+        return new PromptTemplate(
+                "What's the weather like in {location}",
+                Map.of(
+                        "location", location
                 )
         );
     }

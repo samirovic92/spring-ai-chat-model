@@ -32,4 +32,9 @@ public class AIChatController {
     public MathReasoning solveEquation(@RequestBody String equation) {
         return chatService.solveEquation(equation);
     }
+
+    @GetMapping("/weather")
+    public String getWeatherByLocation(@RequestParam String location) {
+        return chatService.getWeather(location);
+    }
 }

@@ -5,6 +5,7 @@ This project demonstrates the integration of OpenAI's chat model API into a Spri
 the topic implemented in this project are : 
 - Multimodal
 - Structured Outputs + Integrating with BeanOutputConverter
+- Function Calling
 
 ## Technical Stack:
 
