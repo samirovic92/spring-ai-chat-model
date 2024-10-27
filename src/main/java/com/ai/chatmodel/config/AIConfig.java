@@ -17,4 +17,14 @@ public class AIConfig {
     public Function<WeatherRequest, WeatherResponse> currentWeather() {
         return new WeatherServiceMock();
     }
+
+    // Another way to register a function is to create a FunctionCallbackWrapper like this:
+    //@Bean
+    //public FunctionCallback weatherFunctionInfo() {
+    //
+    //    return FunctionCallbackWrapper.builder(new MockWeatherService())
+    //            .withName("CurrentWeather") // (1) function name
+    //            .withDescription("Get the weather in location") // (2) function description
+    //            .build();
+    //}
 }
